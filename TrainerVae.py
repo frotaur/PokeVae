@@ -29,7 +29,11 @@ class TrainerVae(Trainer):
     
     def process_batch_valid(self, batch_data, data_dict: dict, **kwargs):
         pass
-
+    
+    def change_lr(self,lr):
+        for g in self.optim.param_groups:
+            g['lr'] = lr
+            
     def get_loaders(self, batch_size):
         loader = DataLoader(self.dataset,batch_size=batch_size,shuffle=True)
 

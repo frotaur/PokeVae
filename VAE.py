@@ -150,12 +150,14 @@ class VAE(DevModule):
 
         self.c = c_loss
 
+        self.gamma = nn.Parameter(torch.tensor(1.,device=self.device))
+
     def comp_loss(self,pred,target, lat_mu, lat_logvar):
         """
             Compute the VAE loss, including Kullback Leibler divergence
         """
 
-        predloss = nn.functional.mse_loss(pred,target)*self.c
+        predloss =1./(2*(self.gamma)**2)*nn.functional.mse_loss(pred,target)*self.c+torch.log(self.gamma/torch.pi)
         kullbackloss = -.5*(lat_logvar+1-torch.exp(lat_logvar)-lat_mu**2)
         
         return predloss,kullbackloss.mean()
