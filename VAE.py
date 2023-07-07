@@ -16,16 +16,16 @@ class Encoder(DevModule):
         self.convoluter = nn.Sequential(
             nn.Conv2d(4,16,kernel_size=(5,5)), # (16,img_s-4)
             nn.BatchNorm2d(16),
-            nn.LeakyReLU(), 
+            nn.ReLU(), 
             nn.Conv2d(16,32,kernel_size=(3,3),stride=2,padding=1), # (32,img_s)
             nn.BatchNorm2d(32),
-            nn.LeakyReLU(),
+            nn.ReLU(),
             nn.Conv2d(32,64,kernel_size=(3,3),stride=2,padding=1),
             nn.BatchNorm2d(64),
-            nn.LeakyReLU(),
+            nn.ReLU(),
             nn.Conv2d(64,128,kernel_size=(3,3),stride=2,padding=1),
             nn.BatchNorm2d(128),
-            nn.LeakyReLU(),
+            nn.ReLU(),
             nn.Conv2d(128,256,kernel_size=(3,3),stride=2,padding=1),
             nn.BatchNorm2d(256)
         )
@@ -106,18 +106,18 @@ class Decoder(DevModule):
         self.deconvo = nn.ModuleList([
             nn.ConvTranspose2d(256,128,kernel_size=(3,3),stride=2,padding=1),
             nn.BatchNorm2d(128),
-            nn.LeakyReLU(),
+            nn.ReLU(),
             nn.ConvTranspose2d(128,64,kernel_size=(3,3),stride=2,padding=1),
             nn.BatchNorm2d(64),
-            nn.LeakyReLU(),
+            nn.ReLU(),
             nn.ConvTranspose2d(64,32,kernel_size=(3,3),stride=2,padding=1,output_padding=1),
             nn.BatchNorm2d(32),
-            nn.LeakyReLU(),
+            nn.ReLU(),
             nn.ConvTranspose2d(32,16,kernel_size=(3,3),stride=2,padding=1,output_padding=1),
             nn.BatchNorm2d(16),
-            nn.LeakyReLU(),
+            nn.ReLU(),
             nn.ConvTranspose2d(16,4,kernel_size=(5,5)),
-            nn.Tanh()
+            nn.Sigmoid()
         ])
 
     def forward(self,latent_vec):
@@ -156,9 +156,9 @@ class VAE(DevModule):
         """
 
         predloss = nn.functional.mse_loss(pred,target)*self.c
-        kullbackloss = -.5*(lat_logvar+1-torch.exp(lat_logvar)-lat_mu**2)*0
+        kullbackloss = -.5*(lat_logvar+1-torch.exp(lat_logvar)-lat_mu**2)
         
-        return predloss+kullbackloss.mean()
+        return predloss,kullbackloss.mean()
 
     def forward(self,x):
         """

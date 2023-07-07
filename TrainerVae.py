@@ -16,14 +16,16 @@ class TrainerVae(Trainer):
         img_batch = batch_data
         batch_log = data_dict['batch_log']
 
-        out, loss = self.model(img_batch)
+        out, (loss_mse,loss_kull) = self.model(img_batch)
 
         with torch.no_grad():
             if(data_dict['batchnum']%batch_log==batch_log-1):
                 predvstrue = tuts.make_grid(torch.cat([out[:4],img_batch[:4]]))
                 self.writer.add_image('predicted vs true',predvstrue.detach().cpu(),data_dict['time'])
+                self.writer.add_scalar('kulloss',loss_kull.item(),data_dict['time'])
+                self.writer.add_scalar('loss_mse',loss_mse.item(),data_dict['time'])
         
-        return loss, data_dict
+        return loss_mse+loss_kull, data_dict
     
     def process_batch_valid(self, batch_data, data_dict: dict, **kwargs):
         pass
